@@ -7,29 +7,22 @@ function loadMilestones() {
   milestones.innerHTML = `${milestonesData
     .map(function (milestone) {
       return `<div class="milestone border-b" id="${milestone._id}">
-      <div class="flex">
-        <div class="checkbox"><input type="checkbox" onclick="markMileStone(this, ${
-          milestone._id
-        })" /></div>
-        <div onclick="openMilestone(this, ${milestone._id})">
-          <p>
-            ${milestone.name}
-            <span><i class="fas fa-chevron-down"></i></span>
-          </p>
+        <div class="flex">
+          <div class="checkbox"><input type="checkbox" onClick="markMileStone(this, ${milestone._id})" /></div>
+          <div onclick="openMilestone(this, ${milestone._id})">
+            <p>${milestone.name}<span><i class="fas fa-chevron-down"></i></span></p>
+          </div>
         </div>
-      </div>
-      <div class="hidden_panel">
-        ${milestone.modules
-          .map(function (module) {
-            return `<div class="module border-b">
-            <p>${module.name}</p>
-          </div>`;
-          })
-          .join("")}
-      </div>
-    </div>`;
-    })
-    .join("")}`;
+        <div class="hidden_panel">
+          ${milestone.modules
+            .map(function (module) {
+              return `<div class="module border-b"><p>${module.name}</p></div>`;
+            })
+            .join("")}
+        </div>
+      </div>`;
+    }).join("")
+    }`;
 }
 
 function openMilestone(milestoneElement, id) {
@@ -37,19 +30,15 @@ function openMilestone(milestoneElement, id) {
   const shownPanel = document.querySelector(".show");
   const active = document.querySelector(".active");
 
-  // first remove previous active class if any [other than the clicked one]
-  if (active && !milestoneElement.classList.contains("active")) {
+  if (!milestoneElement.classList.contains("active") && active) {
     active.classList.remove("active");
   }
 
-  // toggle current clicked one
   milestoneElement.classList.toggle("active");
 
-  // first hide previous panel if open [other than the clicked element]
   if (!currentPanel.classList.contains("show") && shownPanel)
     shownPanel.classList.remove("show");
 
-  // toggle current element
   currentPanel.classList.toggle("show");
 
   showMilestone(id);
@@ -58,37 +47,42 @@ function openMilestone(milestoneElement, id) {
 function showMilestone(id) {
   const milestoneImage = document.querySelector(".milestoneImage");
   const name = document.querySelector(".title");
-  const details = document.querySelector(".details");
+  const description = document.querySelector(".details");
 
   milestoneImage.style.opacity = "0";
+
   milestoneImage.src = milestonesData[id].image;
   name.innerText = milestonesData[id].name;
-  details.innerText = milestonesData[id].description;
+  description.innerText = milestonesData[id].description;
 }
 
-// listen for hero image load
 const milestoneImage = document.querySelector(".milestoneImage");
-milestoneImage.onload = function () {
+
+milestoneImage.addEventListener("load", function () {
   this.style.opacity = "1";
-};
+});
 
 function markMileStone(checkbox, id) {
   const doneList = document.querySelector(".doneList");
-  const milestonesList = document.querySelector(".milestones");
+  const markMileStoneList = document.querySelector(".milestones");
+
   const item = document.getElementById(id);
 
   if (checkbox.checked) {
-    // mark as done
-    milestonesList.removeChild(item);
+    // it removes from its previous dom and append to the new one
     doneList.appendChild(item);
   } else {
-    // back to main list
-    milestonesList.appendChild(item);
-    doneList.removeChild(item);
-
-    // task - do the sorting
-    // reload list
+    markMileStoneList.appendChild(item);
   }
+
+  if (markMileStoneList) sortById(markMileStoneList);
+  if (doneList) sortById(doneList);
+}
+
+function sortById(parent) {
+  Array.from(parent.children)
+    .sort((a, b) => parseInt(a.id) - parseInt(b.id))
+    .forEach((item) => parent.appendChild(item));
 }
 
 loadMilestones();
